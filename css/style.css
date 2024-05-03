@@ -80,4 +80,6 @@ nav a{
 
 nav a:hover{
     opacity: 90%;
+    transform: translateX(20px);
+    color: black;
 }
