@@ -428,7 +428,7 @@ Agora vamos tratar da luz
 ***************************************************/
 var uAmbientLight = [0.2, 0.2, 0.2]; // Luz ambiente fraca
 var uLightColor = [1.0, 1.0, 1.0]; // Luz  branca
-var uLightPosition = [1.0, 1.0, -2.0]; // Posição da luz
+var uLightPosition = [-0.5, 0.5, -2.0]; // Posição da luz
 
 //Cálculo da Direção do Spotlight: A direção do Spotlight é
 //simplesmente a direção do vetor que aponta do ponto de origem da luz
@@ -479,19 +479,28 @@ utils.linkUniformVariable({shaderName : "uOuterCutOff", value : uOuterCutOff, ki
 /************************************************/
 // Capture os eventos do teclado
 /************************************************/
-var cameraPosition = { x: 0, y: 0, z: 5 };
+var cameraPosition = { x: 0, y: 0, z: 3 };
 var cameraRotation = { pitch: 0, yaw: 0 };
-
+var spotlightOn = true;
 
 /*
 TODO: Atividade 7 - criar evento do movimento do mouse para controlar pitch/yaw
 */
 document.getElementById("canvas").addEventListener("mousemove", function(event){
-    let x = event.clientX;
-    let y = event.clientY;
+    var rSpeed = 0.01;
+    
+    cameraRotation.yaw -= event.movementX * rSpeed;
+    cameraRotation.pitch -= - event.movementY * rSpeed;
+    updateViewMatrix();
+});
 
-    console.log(x,y);
-})
+//click esquerdo para centralizar camera novamente, clique direito apaga/acende spotlight
+document.getElementById("canvas").addEventListener("click", function(event){
+
+    cameraPosition = { x: 0, y: 0, z: 3 };
+    cameraRotation = { pitch: 0, yaw: 0 };
+    updateViewMatrix();
+});
 
 document.addEventListener('keydown', function(event) {
     var tSpeed = 0.1; // Velocidade de movimento da câmera
@@ -538,6 +547,14 @@ document.addEventListener('keydown', function(event) {
     cameraRotation.yaw -= rSpeed;
     break;
     
+    case 'f':
+    if(spotlightOn){
+        uLightColor = [0.0, 0.0, 0.0];
+        spotlightOn = false;
+    } else{ uLightColor = [1.0, 1.0, 1.0]; spotlightOn = true}
+
+    utils.linkUniformVariable({shaderName : "uLightColor", value : uLightColor, kind : "3fv"});
+    break;
     }
     
     updateViewMatrix();
@@ -590,7 +607,7 @@ utils.linkUniformMatrix({shaderName:"uProjectionMatrix", value: projectionPerspe
 var viewMatrix = mat4.create();
 mat4.lookAt(
     viewMatrix,
-    [0,0,5],
+    [0,0,3],
     [0,0,0],
     [0,1,0]
 );
