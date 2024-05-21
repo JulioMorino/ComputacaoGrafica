@@ -482,9 +482,16 @@ utils.linkUniformVariable({shaderName : "uOuterCutOff", value : uOuterCutOff, ki
 var cameraPosition = { x: 0, y: 0, z: 5 };
 var cameraRotation = { pitch: 0, yaw: 0 };
 
-function mouseEvent(params) {
-    //console.log(params.target.value);
-}
+
+/*
+TODO: Atividade 7 - criar evento do movimento do mouse para controlar pitch/yaw
+*/
+document.getElementById("canvas").addEventListener("mousemove", function(event){
+    let x = event.clientX;
+    let y = event.clientY;
+
+    console.log(x,y);
+})
 
 document.addEventListener('keydown', function(event) {
     var tSpeed = 0.1; // Velocidade de movimento da câmera

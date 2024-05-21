@@ -482,9 +482,6 @@ utils.linkUniformVariable({shaderName : "uOuterCutOff", value : uOuterCutOff, ki
 var cameraPosition = { x: 0, y: 0, z: 5 };
 var cameraRotation = { pitch: 0, yaw: 0 };
 
-function mouseEvent(params) {
-    //console.log(params.target.value);
-}
 
 document.addEventListener('keydown', function(event) {
     var tSpeed = 0.1; // Velocidade de movimento da câmera
