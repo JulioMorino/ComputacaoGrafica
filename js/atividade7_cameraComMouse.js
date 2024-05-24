@@ -29,6 +29,56 @@ var cubeColors = [
     [1.0, 1.0, 1.0]    // branco
 ]
 
+var imageSize = 0.16666;
+var textureCoordinates = [
+    // Face frontal
+    imageSize, 0.0,
+    imageSize * 2, 0.0,
+    imageSize * 2, 1.0,
+    imageSize, 0.0,
+    imageSize * 2, 1.0,
+    imageSize, 1.0,
+
+    // Face traseira
+    imageSize * 2, 0.0,
+    imageSize * 3, 0.0,
+    imageSize * 3, 1.0,
+    imageSize * 2, 0.0,
+    imageSize * 3, 1.0,
+    imageSize * 2, 1.0,
+
+    // Face superior
+    imageSize * 3, 0.0,
+    imageSize * 4, 0.0,
+    imageSize * 4, 1.0,
+    imageSize * 3, 0.0,
+    imageSize * 4, 1.0,
+    imageSize * 3, 1.0,
+
+    // Face inferior
+    0.0, 0.0,
+    imageSize, 0.0,
+    imageSize, 1.0,
+    0.0, 0.0,
+    imageSize, 1.0,
+    0.0, 1.0,
+
+    // Face esquerda
+    imageSize * 4, 0.0,
+    imageSize * 5, 0.0,
+    imageSize * 5, 1.0,
+    imageSize * 4, 0.0,
+    imageSize * 5, 1.0,
+    imageSize * 4, 1.0,
+
+    // Face direita
+    imageSize * 5, 0.0,
+    imageSize * 6, 0.0,
+    imageSize * 6, 1.0,
+    imageSize * 5, 0.0,
+    imageSize * 6, 1.0,
+    imageSize * 5, 1.0,
+];
 
 /*
   A função recebe três pontos assumidamente distintos.  Como esses
@@ -128,7 +178,8 @@ precision mediump float;
 
 in vec3 aPosition;
 in vec3 aNormal;
-in vec3 aColor;
+//in vec3 aColor;//POIS AGORA VOU USAR TEXTURA
+in vec2 textCoords;
 
 /*
  ToDo: Coloque aqui variáveis uniformes para a
@@ -158,7 +209,8 @@ uniform vec3 uLightColor;  // Cor da luz
 out vec3 vNormal;  // Normal para cálculo no fragment shader
 out vec3 vLightDir;  // Direção da luz para cálculo no fragment shader
 out vec3 vViewPosition;  // Posição do ponto de vista para cálculo no fragment shader
-out vec4 vColor;  // Cor para interpolação
+//out vec4 vColor;  //POIS AGORA VOU USAR TEXTURA
+out vec2 textureCoords;
 
 void main() {
     // Cálculo das matrizes de rotação baseadas em ângulos theta
@@ -224,18 +276,20 @@ void main() {
     vNormal = normalize(mat3(transpose(inverse(modelMatrix))) * aNormal);
     vLightDir = normalize(uLightPosition - vec3(transformedPosition));
     vViewPosition = vec3(transformedPosition);
-    vColor = vec4(aColor, 1.0);  // Passa a cor original para interpolação
+    textureCoords = textCoords;
 }
 `,
     fragmentShader : `#version 300 es
 precision mediump float;
 
-in vec4 vColor;  // Cor vinda do vertex shader
+//in vec4 vColor;  //POIS AGORA VOU USAR TEXTURA
 in vec3 vNormal; // Normal transformada vinda do vertex shader
 in vec3 vLightDir; // Direção da luz vinda do vertex shader
 in vec3 vViewPosition; // Posição do vértice vinda do vertex shader
 
 out vec4 fColor;
+in vec2 textureCoords;
+uniform sampler2D uSampler;
 
 uniform vec3 uLightPosition; // Posição da fonte de luz Spotlight
 uniform vec3 uLightDirection; // Direção da luz Spotlight
@@ -245,14 +299,15 @@ uniform float uCutOff; // Ângulo de corte do cone de luz
 uniform float uOuterCutOff; // Ângulo externo para suavização na borda do cone
 
 void main() {
+    vec4 texColor = texture(uSampler, textureCoords);
     // Calcula componente ambiente
-    vec3 ambient = uAmbientLight * vColor.rgb;
+    vec3 ambient = uAmbientLight * texColor.rgb; //antes, havia vColor, agora usarei meu texColor
 
     // Calcula componente difusa
     vec3 norm = normalize(vNormal);
     vec3 lightDir = normalize(vLightDir);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = uLightColor * diff * vColor.rgb;
+    vec3 diffuse = uLightColor * diff * texColor.rgb;
 
     // Calcula componente especular (não implementado aqui para simplificação)
 
@@ -265,7 +320,7 @@ void main() {
 
     // Combina os componentes de iluminação
     vec3 lighting = (ambient + diffuse * intensity);
-    fColor = vec4(lighting, vColor.a); // Mantém o canal alpha da cor original
+    fColor = vec4(lighting, texColor.a);
 }
 `
 });
@@ -276,11 +331,16 @@ void main() {
 utils.initBuffer({vertices});
 utils.linkBuffer({reading : 3});
 
+/*
 // Mandaremos as cores, também leremos de três em três, dado que
 // estamos enviando RGB.
 utils.initBuffer({vertices : colors});
 utils.linkBuffer({variable : "aColor", reading : 3});
+*/
 
+utils.initBuffer({ vertices: textureCoordinates });
+//utils.linkBuffer({ variable: "aColor", reading: 3 });
+utils.linkBuffer({reading : 2, variable : "textCoords"});
 // Mandaremos as cores, também leremos de três em três, dado que
 // estamos enviando RGB.
 utils.initBuffer({vertices : colors});
@@ -317,6 +377,31 @@ var scale = 0;
 
 // Velocidade da animação
 var speed = 100;
+
+/*
+CRIANDO A TEXTURA
+*/
+
+var gl = utils.gl;
+var texture1 = gl.createTexture();
+
+var facesImages = new Image();
+facesImages.onload = function() {
+
+    gl.bindTexture(gl.TEXTURE_2D, texture1);
+    gl.texImage2D(gl.TEXTURE_2D,  0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,facesImages);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);      
+}
+facesImages.src = 'texturas/textura_cada_face.jpg';
+
+/*
+ATIVANDO TEXTURA
+*/ 
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, texture1);
 
 document.getElementById("slider").onchange = function(event) {
     speed = 100 - event.target.value;
@@ -477,7 +562,7 @@ utils.linkUniformVariable({shaderName : "uOuterCutOff", value : uOuterCutOff, ki
 
 
 /************************************************/
-// Capture os eventos do teclado
+// Capture os eventos do teclado e mouse
 /************************************************/
 var cameraPosition = { x: 0, y: 0, z: 3 };
 var cameraRotation = { pitch: 0, yaw: 0 };
@@ -637,6 +722,8 @@ function render(){
 
     utils.linkUniformVariable({shaderName : "uScale", value : uScale, kind : "1f"});
     
+    utils.linkUniformVariable({shaderName:"uSampler", value:0, kind:"1i"});
+
     utils.drawElements({method : "TRIANGLES"});
 
         
