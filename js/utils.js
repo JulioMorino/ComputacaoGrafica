@@ -206,19 +206,24 @@ void main(){
 	this.gl[`uniformMatrix${kind}`](colorLoc, false, value);
     }
 
-    initTexture(image) {
+initTexture({ image = new Image(),
+	      textureType = 'TEXTURE_2D',
+	      wrapS = 'MIRRORED_REPEAT',
+	      wrapT = 'MIRRORED_REPEAT',
+	      minFilter = 'LINEAR',
+	      magFilter = 'LINEAR' } = {}) {
         var texture = this.gl.createTexture();
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
+        this.gl.bindTexture(this.gl[textureType], texture);
+        this.gl.texImage2D(this.gl[textureType], 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
 
-	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.MIRRORED_REPEAT);
-	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.MIRRORED_REPEAT);    
-    	
+        this.gl.texParameteri(this.gl[textureType], this.gl.TEXTURE_WRAP_S, this.gl[wrapS]);
+        this.gl.texParameteri(this.gl[textureType], this.gl.TEXTURE_WRAP_T, this.gl[wrapT]);
 
-	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
 
-	return texture;
+        this.gl.texParameteri(this.gl[textureType], this.gl.TEXTURE_MIN_FILTER, this.gl[minFilter]);
+        this.gl.texParameteri(this.gl[textureType], this.gl.TEXTURE_MAG_FILTER, this.gl[magFilter]);
+
+        return texture;
     }
 
     activateTexture(texture, position){
