@@ -200,7 +200,7 @@ var kernelDesfoqueBinomial = [
     1/16, 2/16, 1/16
 ]
 
-var kernelSuavização = [
+var kernelSuavizacao = [
     1/8, 1/8, 1/8,
     1/8, 0,   1/8,
     1/8, 1/8, 1/8
