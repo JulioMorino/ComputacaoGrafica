@@ -97,7 +97,7 @@ function makeFace(v1, v2, v3, v4) {
     }
 }
 
-// Abaixo tomamos o cuidade de sempre gerar uma face começando com um
+// Abaixo tomamos o cuidado de sempre, gerar uma face começando com um
 // dos vértices. Isso permite dar à face a cor do vértice.
 makeFace(1, 0, 3, 2);
 makeFace(2, 3, 7, 6);
@@ -116,18 +116,11 @@ in vec3 aPosition;
 //in vec3 aColor;//POIS AGORA VOU USAR TEXTURA
 in vec2 textCoords;
 
-/*
- ToDo: Coloque aqui variáveis uniformes para a
-  câmera, como o uViewMatrix e uProjectionMatrix
- vistos em aulas anteriores
-*/
+
 uniform mat4 uViewMatrix;
 uniform mat4 uProjectionMatrix;
 
-/*
- ToDo: Coloque aqui variáveis uniformes para os ângulos
- de rotação. Como uPitch e uYaw
-*/
+
 uniform float uPitch;
 uniform float uYaw;
 uniform vec3 theta;  // Ângulos de rotação para x, y, z
@@ -173,7 +166,7 @@ void main() {
         uTranslation.x, uTranslation.y, uTranslation.z, 1.0
     );
 
-   // Todo: Crie as matrizes de rotação da câmera com o uPitch e uYaw
+   
     mat4 pitchMatrix = mat4(
         1.0, 0.0, 0.0, 0.0,
         0.0, cos((uPitch)), -sin((uPitch)), 0.0,
@@ -188,8 +181,7 @@ void main() {
         0.0, 0.0, 0.0, 1.0
     );
 
-    // Todo: Adicione as matrizes relacionadas à câmera à esquerda da
-    // da translação do objeto. 
+    
     mat4 modelMatrix = uProjectionMatrix * yawMatrix * pitchMatrix * uViewMatrix * translationMatrix * scaleMatrix * rz * ry * rx;
     
 
@@ -215,25 +207,23 @@ void main() {
         vec2 onePixel = vec2(1.0, 1.0) / uTextureSize;
     
 
-        vec4 valorPixelSupEsquerdo  = texture(uSampler, textureCoords + onePixel * vec2(-1, 1))    * uKernel[0];
-        vec4 valorPixelSuperior     = texture(uSampler, textureCoords + onePixel * vec2(0, 1))     * uKernel[1];
-        vec4 valorPixelSupDireito   = texture(uSampler, textureCoords + onePixel * vec2(1, 1))     * uKernel[2];
-        vec4 valorPixelEsquerdo     = texture(uSampler, textureCoords + onePixel * vec2(-1, 0))    * uKernel[3];
-        vec4 valorPixelCentro       = texture(uSampler, textureCoords + onePixel * vec2(0, 0))     * uKernel[4];
-        vec4 valorPixelDireito      = texture(uSampler, textureCoords + onePixel * vec2(1, 0))     * uKernel[5];
-        vec4 valorPixelInfEsquerdo  = texture(uSampler, textureCoords + onePixel * vec2(-1, -1))   * uKernel[6];
-        vec4 valorPixelInferior     = texture(uSampler, textureCoords + onePixel * vec2(0, -1))    * uKernel[7];
-        vec4 valorPixelInfDireito   = texture(uSampler, textureCoords + onePixel * vec2(1, -1))    * uKernel[8];
+        vec4 pixelSupEsquerdo  = texture(uSampler, textureCoords + onePixel * vec2(-1,  1))  * uKernel[0];
+        vec4 pixelSuperior     = texture(uSampler, textureCoords + onePixel * vec2( 0,  1))  * uKernel[1];
+        vec4 pixelSupDireito   = texture(uSampler, textureCoords + onePixel * vec2( 1,  1))  * uKernel[2];
+        vec4 pixelEsquerdo     = texture(uSampler, textureCoords + onePixel * vec2(-1,  0))  * uKernel[3];
+        vec4 pixelCentro       = texture(uSampler, textureCoords + onePixel * vec2( 0,  0))  * uKernel[4];
+        vec4 pixelDireito      = texture(uSampler, textureCoords + onePixel * vec2( 1,  0))  * uKernel[5];
+        vec4 pixelInfEsquerdo  = texture(uSampler, textureCoords + onePixel * vec2(-1, -1))  * uKernel[6];
+        vec4 pixelInferior     = texture(uSampler, textureCoords + onePixel * vec2( 0, -1))  * uKernel[7];
+        vec4 pixelInfDireito   = texture(uSampler, textureCoords + onePixel * vec2( 1, -1))  * uKernel[8];
         
         
-        fColor = valorPixelSupEsquerdo + valorPixelSuperior + valorPixelSupDireito + valorPixelEsquerdo + valorPixelCentro + valorPixelDireito + valorPixelInfEsquerdo + valorPixelInferior + valorPixelInfDireito;
+        fColor = pixelSupEsquerdo + pixelSuperior + pixelSupDireito + pixelEsquerdo + pixelCentro + pixelDireito + pixelInfEsquerdo + pixelInferior + pixelInfDireito;
         fColor.a = 1.0;
         
     }`
 });
 
-
-// Mandaremos o vértice, lembrando agora que leremos o vetor de três em três.
 utils.initBuffer({vertices});
 utils.linkBuffer({reading : 3});
 
@@ -267,7 +257,6 @@ var speed = 100;
 /*
 CRIANDO A TEXTURA
 */
-
 var gl = utils.gl;
 var texture1 = gl.createTexture();
 
@@ -383,7 +372,7 @@ document.getElementById("realcar").onclick = function(event){
     realcar = true;
     suavizar = false;
     agucar = false;
-    console.log("clicou");
+    
 };
 
 document.getElementById("agucar").onclick = function(event){
@@ -402,7 +391,7 @@ var cameraRotation = { pitch: 0, yaw: 0 };
 var spotlightOn = true;
 
 /*
-TODO: Atividade 7 - criar evento do movimento do mouse para controlar pitch/yaw
+evento do movimento do mouse para controlar pitch/yaw
 */
 document.getElementById("canvas").addEventListener("mousemove", function(event){
     var rSpeed = 0.01;
@@ -412,7 +401,7 @@ document.getElementById("canvas").addEventListener("mousemove", function(event){
     updateViewMatrix();
 });
 
-//click esquerdo para centralizar camera novamente, clique direito apaga/acende spotlight
+//click esquerdo para centralizar camera novamente
 document.getElementById("canvas").addEventListener("click", function(event){
 
     cameraPosition = { x: 0, y: 0, z: 3 };
@@ -480,8 +469,6 @@ function updateViewMatrix() {
 /***************************************************
 Agora vamos tratar da câmera
 ***************************************************/
-
-// ToDo: Crie uma projeção em perspectiva
 var projectionPerspectiveMatrix = mat4.create();
 mat4.perspective(
     projectionPerspectiveMatrix,
@@ -491,12 +478,9 @@ mat4.perspective(
     100 //far
 );
 
-// ToDo: Ligue a matriz de projeção com o shader. Use
-// provavelmente um variável de nome uProjectionMatrix
-// no shader
 utils.linkUniformMatrix({shaderName:"uProjectionMatrix", value: projectionPerspectiveMatrix});
 
-// ToDo: Crie uma matriz de visualização olhando
+//matriz de visualização olhando
 // para o centro do cubo.
 var viewMatrix = mat4.create();
 mat4.lookAt(
@@ -554,7 +538,7 @@ function render(){
 
     if  (suavizar)    utils.linkUniformVariable({shaderName: "uKernel", value: kernelSuavizacao, kind: "1fv"});
     if  (realcar)     utils.linkUniformVariable({shaderName: "uKernel", value: kernelRealcaBorda, kind: "1fv"});
-    if  (agucar)  utils.linkUniformVariable({shaderName: "uKernel", value: kernelAgucamento, kind: "1fv"});
+    if  (agucar)      utils.linkUniformVariable({shaderName: "uKernel", value: kernelAgucamento, kind: "1fv"});
 
     utils.linkUniformVariable({shaderName : "theta", value : theta, kind : "3fv"});
 
